@@ -1,0 +1,8 @@
+96
+0
+128
+255
+Arg out of range [0..255]
+stoi argument out of range
+Arg out of range [0..255]
+invalid stoi argument

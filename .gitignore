@@ -1,5 +1,19 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
-
-/lab1.1/.vs/lab1.1/v15
+﻿/lab1.3
+/flipbyte/.vs/flipbyte/v15
+/flipbyte/Debug
+/flipbyte/flipbyte/Debug
+/flipbyte/flipbyte/flipbyte.vcxproj
+/flipbyte/flipbyte/flipbyte.vcxproj.filters
+/flipbyte/flipbyte/flipbyte.vcxproj.user
+/flipbyte/flipbyte.sln
+/lab1.1
+/lab1.2
+/join/.vs/join/v15
+/join/Debug
+/join/join/Debug
+/join/tests/temp1.txt
+/join/tests/temp2.txt
+/join/join/join.vcxproj
+/join/join/join.vcxproj.filters
+/join/join/join.vcxproj.user
+/join/join.sln
