@@ -1,54 +1,24 @@
-
-// Вариант 5. Программа flipbyte. Битовый зеркальный разворот входного числа и вывод результата в 10 системе счисления.
-#include <cstdint>
+#include "logic.cpp"
 #include <iostream>
 
 using namespace std;
 
-uint8_t getInputByte(int argc, char* argv[])
+int main(int argc, char * argv[])
 {
-	uint8_t res;
+	uint8_t number;
 	try
 	{
 		if (argc < 2)
 		{
-			throw exception("Not enough arg");
+			throw invalid_argument("Not enough argument. Required 1 number in range [0..255] for program");
 		}
-		int number = stoi(argv[1]);
-		if (number >= 0 && number < 256)
-		{
-			res = static_cast<uint8_t>(number);
-		}
-		else
-		{
-			throw exception("Arg out of range [0..255]");
-		}
+		number = GetInputByte(argv[1]);
 	}
-	catch (const std::exception& exception)
+	catch (const exception & ex)
 	{
-		cout << exception.what() << endl;
-		exit(0);
+		cerr << ex.what() << endl;
+		return 1;
 	}
-	return res;
-}
-
-uint8_t getFlipedByte(uint8_t byte)
-{
-	uint8_t res = 0;
-	for (size_t i = 0; i < 8; ++i)
-	{
-		if (byte & (1 << (7 - i)))
-		{
-			res += 1 << i;
-		}
-	}
-	return res;
-}
-
-int main(int argc, char* argv[])
-{
-	int number = getInputByte(argc, argv);
-	int flippedNumber = getFlipedByte(number);
-	cout << flippedNumber << endl;
-	return 0;
+	number = GetFlipedByte(number);
+	cout << number << endl;
 }

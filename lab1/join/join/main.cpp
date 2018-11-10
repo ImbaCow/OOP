@@ -1,40 +1,50 @@
-// Вариант 5. Программа join. Слияние входных файлов в один выходной
-
 #include <fstream>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
-int main(int argc, char* argv[])
+void JoinInputFile(const string & inputName, ofstream & output)
 {
-	if (argc > 2)
+	ifstream input(inputName, ios::binary);
+	if (!input.is_open())
 	{
-		ofstream output(argv[argc - 1], ios::binary);
-		if (!output.is_open())
-		{
-			cout << "Output file dir not found" << endl;
-			exit(0);
-		}
-		for (size_t i = 1; i < argc - 1; ++i)
-		{
-			ifstream input(argv[i], ios::binary);
-			if (!input.is_open())
-			{
-				cout << "Input file \"" << argv[i] << "\" not found" << endl;
-				exit(0);
-			}
-			char* ch = new char;
-			while (input.read(ch, sizeof(char)))
-			{
-				output.write(ch, sizeof(char));
-			}
-			input.close();
-			delete ch;
-		}
-		output.close();
+		throw invalid_argument("Input file '" + inputName + "' not found");
 	}
-	else
+	char ch;
+	while (input.get(ch))
 	{
-		cout << "Not enough arg" << endl;
+		output << ch;
+	}
+}
+
+void MergeInputFiles(int numberOffArguments, char * argArray[])
+{
+	const size_t outputFileIndex = numberOffArguments - 1;
+	ofstream output(argArray[outputFileIndex], ios::binary);
+	if (!output.is_open())
+	{
+		throw invalid_argument("No such output file directory was found");
+	}
+	for (size_t i = 1; i < outputFileIndex; ++i)
+	{
+		JoinInputFile(string(argArray[i]), output);
+	}
+}
+
+int main(int argc, char * argv[])
+{
+	try
+	{
+		if (argc < 3)
+		{
+			throw  invalid_argument("Not enough arguments. You need at least 2 file name in format: <input file1> ... <input file N> <output file>");
+		}
+		MergeInputFiles(argc, argv);
+	}
+	catch (const exception & ex)
+	{
+		cerr << ex.what() << endl;
+		return 1;
 	}
 }
