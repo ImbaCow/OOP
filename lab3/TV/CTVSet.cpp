@@ -36,7 +36,7 @@ void CTVSet::SelectChannel(const unsigned channelNumber)
 	{
 		throw std::logic_error("Tv is off");
 	}
-	if (channelNumber <= 0 || channelNumber >= MAX_CHANNEL_NUMBER)
+	if (!IsChannelInRange(channelNumber))
 	{
 		throw std::invalid_argument("Channel out of range 1.." + std::to_string(MAX_CHANNEL_NUMBER - 1));
 	}
@@ -67,25 +67,29 @@ void CTVSet::SetChannelName(const unsigned channelNumber, const std::string & ne
 	{
 		throw std::logic_error("Tv is off");
 	}
-	if (channelNumber <= 0 || channelNumber >= MAX_CHANNEL_NUMBER)
+	if (!IsChannelInRange(channelNumber))
 	{
 		throw std::invalid_argument("Channel out of range 1.." + std::to_string(MAX_CHANNEL_NUMBER - 1));
 	}
 	if (newName.empty())
 	{
-		throw std::invalid_argument("String can't be empty");
+		throw std::invalid_argument("Channel name can't be empty");
 	}
 	std::string validNewName(newName);
 	Channel::FormatName(validNewName);
 	if (validNewName.empty())
 	{
-		throw std::invalid_argument("String must have at least 1 non-space symbol");
+		throw std::invalid_argument("Channel name must have at least 1 non-space symbol");
 	}
 	for (auto & channel : m_channels)
 	{
 		if (channel.GetName() == validNewName)
 		{
-			channel.SetName(m_channels[channelNumber].GetName());
+			bool result = channel.SetName(m_channels[channelNumber].GetName());
+			if (!result)
+			{
+				channel.RemoveName();
+			}
 		}
 	}
 	m_channels[channelNumber].SetName(newName);
@@ -112,7 +116,7 @@ std::string CTVSet::GetChannelName(const unsigned channelNumber) const
 	{
 		throw std::logic_error("Tv is off");
 	}
-	if (channelNumber <= 0 && channelNumber >= MAX_CHANNEL_NUMBER)
+	if (!IsChannelInRange(channelNumber))
 	{
 		throw std::invalid_argument("Channel out of range 1.." + std::to_string(MAX_CHANNEL_NUMBER - 1));
 	}
@@ -127,7 +131,7 @@ unsigned CTVSet::GetChannelByName(const std::string & name) const
 	}
 	if (name.empty())
 	{
-		throw std::invalid_argument("String can't be empty");
+		throw std::invalid_argument("Channel name can't be empty");
 	}
 
 	const auto it = std::find_if(m_channels.begin(), m_channels.end(), [&name](const auto channel) {
@@ -148,9 +152,7 @@ void CTVSet::SelectPreviousChannel()
 	}
 	if (m_prevChannel)
 	{
-		const unsigned temp = m_currChannel;
-		m_currChannel = m_prevChannel;
-		m_prevChannel = temp;
+		std::swap(m_currChannel, m_prevChannel);
 	}
 	std::cout << "Previous " << m_currChannel << " Channel selected" << std::endl;
 }
@@ -177,4 +179,9 @@ unsigned CTVSet::GetCurrChannel() const
 std::string CTVSet::GetCurrChannelName() const
 {
 	return m_channels[m_currChannel].GetName();
+}
+
+bool CTVSet::IsChannelInRange(const unsigned channelNumber) const
+{
+	return (channelNumber > 0 && channelNumber < MAX_CHANNEL_NUMBER);
 }

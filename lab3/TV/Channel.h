@@ -2,7 +2,7 @@
 class Channel
 {
 public:
-	void SetName(const std::string & name);
+	bool SetName(const std::string & name);
 	void RemoveName();
 	std::string GetName() const;
 	bool HasEmptyName() const;

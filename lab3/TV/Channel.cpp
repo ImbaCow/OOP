@@ -2,11 +2,16 @@
 #include <boost/algorithm/string/trim_all.hpp>
 #include "Channel.h"
 
-void Channel::SetName(const std::string & newName)
+bool Channel::SetName(const std::string & newName)
 {
 	std::string validatedName(newName);
 	FormatName(validatedName);
+	if (validatedName.empty())
+	{
+		return false;
+	}
 	m_name = validatedName;
+	return true;
 }
 
 void Channel::RemoveName()
