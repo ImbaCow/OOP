@@ -1,9 +1,14 @@
 #include "pch.h"
 #include "Matrix.h"
 
-SquareMatrix3::SquareMatrix3()
-	:m_matr(MATR_SIZE, std::vector<double>(MATR_SIZE, 0))
+SquareMatrix3::SquareMatrix3(const std::string & inputFile)
 {
+	InitFromFile(inputFile);
+}
+
+SquareMatrix3::SquareMatrix3(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr)
+{
+	InitFromMatr(matr);
 }
 
 void SquareMatrix3::InitFromFile(const std::string & inputFile)
@@ -11,7 +16,7 @@ void SquareMatrix3::InitFromFile(const std::string & inputFile)
 	std::ifstream input(inputFile);
 	if (!input.is_open())
 	{
-		throw std::invalid_argument("Input file not found");
+		throw std::invalid_argument("Unavailable to open input file");
 	}
 	std::string line;
 	size_t i = 0;
@@ -43,82 +48,67 @@ void SquareMatrix3::InitFromFile(const std::string & inputFile)
 	}
 }
 
-void SquareMatrix3::SetMatrix(const MatrType<double> & matr)
+void SquareMatrix3::InitFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE>& matr)
 {
-	if (matr.size() != MATR_SIZE)
-	{
-		throw std::invalid_argument("Matrix must be square with size = " + std::to_string(MATR_SIZE));
-	}
-	for (size_t i = 0; i < matr.size(); ++i)
-	{
-		if (matr[i].size() != MATR_SIZE)
-		{
-			throw std::invalid_argument("Matrix must be square with size = " + std::to_string(MATR_SIZE));
-		}
-	}
 	m_matr = matr;
 }
 
-void SquareMatrix3::WriteMainMatr()
+SquareMatrix3 * SquareMatrix3::Invert()
 {
-	WriteMatr(m_matr);
+	m_matr = GetInvert(m_matr);
+	return this;
 }
 
-void SquareMatrix3::WriteInvertMatr()
+SquareMatrix3 * SquareMatrix3::FindAdjugate()
 {
-	WriteMatr(GetInvert(m_matr));
+	m_matr = GetAdjugate(m_matr);
+	return this;
 }
 
-void SquareMatrix3::WriteAdjugateMatr()
+SquareMatrix3 * SquareMatrix3::Transpose()
 {
-	WriteMatr(GetAdjugate(m_matr));
+	m_matr = GetTranspose(m_matr);
+	return this;
 }
 
-void SquareMatrix3::WriteTransposeMatr()
+template <std::size_t SIZE>
+double SquareMatrix3::CalcDet(const MatrType<double, SIZE> & matr) const
 {
-	WriteMatr(GetTranspose(m_matr));
-}
-
-double SquareMatrix3::GetDet()
-{
-	return CalcDet(m_matr);
-}
-
-double SquareMatrix3::CalcDet(const MatrType<double> & matr)
-{
-	if (matr.size() == 1)
-	{
-		return matr[0][0];
-	}
 	double det = 0;
-	for (size_t j = 0; j < matr.size(); ++j) 
+	for (size_t j = 0; j < SIZE; ++j)
 	{
-		det += pow((-1), j) * matr[0][j] * CalcDet(GetMinor(matr, 0, j));
+ 		det += pow((-1), j) * matr[0][j] * CalcDet(GetMinor(matr, 0, j));
 	}
 	return det;
 }
 
-SquareMatrix3::MatrType<double> SquareMatrix3::GetMinor(const MatrType<double> & matr, size_t i, size_t j)
+template <>
+double SquareMatrix3::CalcDet(const MatrType<double, 1> & matr) const
 {
-	size_t minorSize = matr.size() - 1;
-	if (!(i < matr.size() && j < matr.size()))
+	return matr[0][0];
+}
+
+template <std::size_t SIZE>
+SquareMatrix3::MatrType<double, SIZE - 1> SquareMatrix3::GetMinor(const MatrType<double, SIZE> & matr, size_t i, size_t j) const
+{
+	if (!(i < SIZE && j < SIZE))
 	{
 		throw std::logic_error("Not correct line index in GetMinor!");
 	}
-	MatrType<double> minor(minorSize, std::vector<double>(minorSize, 0));
-	for (size_t ti = 0, mi = 0; ti < matr.size(); ++ti, ++mi)
+	MatrType<double, SIZE - 1> minor = { {0} };
+	for (size_t ti = 0, mi = 0; ti < SIZE; ++ti, ++mi)
 	{
 		if (ti == i)
 		{
 			++ti;
 		}
-		for (size_t tj = 0, mj = 0; tj < matr.size(); ++tj, ++mj)
+		for (size_t tj = 0, mj = 0; tj < SIZE; ++tj, ++mj)
 		{
 			if (tj == j)
 			{
 				++tj;
 			}
-			if (ti < matr.size() && tj < matr.size())
+			if (ti < SIZE && tj < SIZE)
 			{
 				minor[mi][mj] = matr[ti][tj];
 			}
@@ -127,12 +117,12 @@ SquareMatrix3::MatrType<double> SquareMatrix3::GetMinor(const MatrType<double> &
 	return minor;
 }
 
-SquareMatrix3::MatrType<double> SquareMatrix3::GetAdjugate(const MatrType<double>& matr)
+SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetAdjugate(const MatrType<double, MATR_SIZE> & matr) const
 {
-	MatrType<double> adjugate(matr.size(), std::vector<double>(matr.size(), 0));
-	for (size_t i = 0; i < matr.size(); ++i)
+	MatrType<double, MATR_SIZE> adjugate = { {0} };
+	for (size_t i = 0; i < MATR_SIZE; ++i)
 	{
-		for (size_t j = 0; j < matr.size(); ++j)
+		for (size_t j = 0; j < MATR_SIZE; ++j)
 		{
 			adjugate[i][j] = pow(-1, (i + j)) * CalcDet(GetMinor(matr, i, j));
 		}
@@ -140,12 +130,12 @@ SquareMatrix3::MatrType<double> SquareMatrix3::GetAdjugate(const MatrType<double
 	return GetTranspose(adjugate);
 }
 
-SquareMatrix3::MatrType<double> SquareMatrix3::GetTranspose(const MatrType<double>& matr)
+SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetTranspose(const MatrType<double, MATR_SIZE>& matr) const
 {
-	MatrType<double> transpose(matr.size(), std::vector<double>(matr.size(), 0));
-	for (size_t i = 0; i < matr.size(); ++i)
+	MatrType<double, MATR_SIZE> transpose = { {0} };
+	for (size_t i = 0; i < MATR_SIZE; ++i)
 	{
-		for (size_t j = 0; j < matr.size(); ++j)
+		for (size_t j = 0; j < MATR_SIZE; ++j)
 		{
 			transpose[i][j] = matr[j][i];
 		}
@@ -153,14 +143,14 @@ SquareMatrix3::MatrType<double> SquareMatrix3::GetTranspose(const MatrType<doubl
 	return transpose;
 }
 
-SquareMatrix3::MatrType<double> SquareMatrix3::GetInvert(const MatrType<double>& matr)
+SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetInvert(const MatrType<double, MATR_SIZE>& matr) const
 {
 	double det = CalcDet(matr);
 	if (det == 0)
 	{
 		throw std::logic_error("Unable to calculate inverse matrix, determinant is 0");
 	}
-	MatrType<double> invert = GetAdjugate(matr);
+	MatrType<double, MATR_SIZE> invert = GetAdjugate(matr);
 	for (auto & line : invert)
 	{
 		for (auto & value : line)
@@ -171,16 +161,20 @@ SquareMatrix3::MatrType<double> SquareMatrix3::GetInvert(const MatrType<double>&
 	return invert;
 }
 
-void SquareMatrix3::WriteMatr(const MatrType<double>& matr)
+void SquareMatrix3::WriteMatr(std::ostream & stream)
 {
-	std::cout << std::setprecision(3) << std::fixed;
-	for (const auto & line : matr)
+	stream << std::setprecision(PRECISION) << std::fixed;
+	for (const auto & line : m_matr)
 	{
 		for (const auto & value : line)
 		{
-			std::cout << value << ' ';
+			stream << value << ' ';
 		}
-		std::cout << std::endl;
+		stream << std::endl;
 	}
 }
 
+double SquareMatrix3::GetDeterminant()
+{
+	return CalcDet(m_matr);
+}

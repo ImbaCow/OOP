@@ -3,30 +3,36 @@
 class SquareMatrix3
 {
 public:
-	template<typename T>
-	using MatrType = std::vector<std::vector<T>>;
-
-	SquareMatrix3();
-	void InitFromFile(const std::string & inputFile);
-	void SetMatrix(const MatrType<double> & matr);
-
-	void WriteMainMatr();
-	void WriteInvertMatr();
-	void WriteAdjugateMatr();
-	void WriteTransposeMatr();
-
-	double GetDet();
-private:
 	static const size_t MATR_SIZE = 3;
-	MatrType<double> m_matr;
 
-	double CalcDet(const MatrType<double> & matr);
+	SquareMatrix3() {};
+	SquareMatrix3(const std::string & inputFile);
+	SquareMatrix3(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
 
-	MatrType<double> GetMinor(const MatrType<double> & matr, size_t i, size_t j);
-	MatrType<double> GetAdjugate(const MatrType<double> & matr);
-	MatrType<double> GetTranspose(const MatrType<double> & matr);
-	MatrType<double> GetInvert(const MatrType<double> & matr);
+	void InitFromFile(const std::string & inputFile);
+	void InitFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
 
-	void WriteMatr(const MatrType<double> & matr);
+	SquareMatrix3 * Invert();
+	SquareMatrix3 * FindAdjugate();
+	SquareMatrix3 * Transpose();
+
+	void WriteMatr(std::ostream & stream);
+	double GetDeterminant();
+private:
+	template<typename T, std::size_t SIZE>
+	using MatrType = std::array<std::array<T, SIZE>, SIZE>;
+
+	static const size_t PRECISION = 3;
+	MatrType<double, MATR_SIZE> m_matr = { {0} };
+
+	template <std::size_t SIZE>
+	double CalcDet(const MatrType<double, SIZE> & matr) const;
+
+	template <std::size_t SIZE>
+	MatrType<double, SIZE - 1> GetMinor(const MatrType<double, SIZE> & matr, size_t i, size_t j) const;
+
+	MatrType<double, MATR_SIZE> GetAdjugate(const MatrType<double, MATR_SIZE> & matr) const;
+	MatrType<double, MATR_SIZE> GetTranspose(const MatrType<double, MATR_SIZE> & matr) const;
+	MatrType<double, MATR_SIZE> GetInvert(const MatrType<double, MATR_SIZE> & matr) const;
 };
 
