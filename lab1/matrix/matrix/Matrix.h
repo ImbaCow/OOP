@@ -1,35 +1,34 @@
 #pragma once
 
-class SquareMatrix3
+template<std::size_t MATR_SIZE>
+class SquareMatrix
 {
 public:
-	static const size_t MATR_SIZE = 3;
+	SquareMatrix();
+	SquareMatrix(const std::string & inputFile);
+	SquareMatrix(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
 
-	SquareMatrix3() {};
-	SquareMatrix3(const std::string & inputFile);
-	SquareMatrix3(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
+	void SetFromFile(const std::string & inputFile);
+	void SetFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
 
-	void InitFromFile(const std::string & inputFile);
-	void InitFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr);
+	void Invert();
+	void Adjugate();
+	void Transpose();
 
-	SquareMatrix3 * Invert();
-	SquareMatrix3 * FindAdjugate();
-	SquareMatrix3 * Transpose();
-
-	void WriteMatr(std::ostream & stream);
-	double GetDeterminant();
+	void WriteMatr(std::ostream & stream) const;
+	double GetDeterminant() const;
 private:
 	template<typename T, std::size_t SIZE>
 	using MatrType = std::array<std::array<T, SIZE>, SIZE>;
 
-	static const size_t PRECISION = 3;
-	MatrType<double, MATR_SIZE> m_matr = { {0} };
+	const MatrType<double, MATR_SIZE> NULL_MATR = { {0} };
+	MatrType<double, MATR_SIZE> m_matr;
 
 	template <std::size_t SIZE>
 	double CalcDet(const MatrType<double, SIZE> & matr) const;
 
 	template <std::size_t SIZE>
-	MatrType<double, SIZE - 1> GetMinor(const MatrType<double, SIZE> & matr, size_t i, size_t j) const;
+	MatrType<double, SIZE - 1> GetMinor(const MatrType<double, SIZE> & matr, size_t line, size_t collumn) const;
 
 	MatrType<double, MATR_SIZE> GetAdjugate(const MatrType<double, MATR_SIZE> & matr) const;
 	MatrType<double, MATR_SIZE> GetTranspose(const MatrType<double, MATR_SIZE> & matr) const;

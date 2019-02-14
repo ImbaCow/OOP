@@ -1,22 +1,36 @@
 #include "pch.h"
 #include "Matrix.h"
 
-SquareMatrix3::SquareMatrix3(const std::string & inputFile)
+namespace
 {
-	InitFromFile(inputFile);
+	const size_t PRECISION = 3;
 }
 
-SquareMatrix3::SquareMatrix3(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr)
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::SquareMatrix()
+	:m_matr(NULL_MATR)
 {
-	InitFromMatr(matr);
 }
 
-void SquareMatrix3::InitFromFile(const std::string & inputFile)
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::SquareMatrix(const std::string & inputFile)
 {
-	std::ifstream input(inputFile);
+	SetFromFile(inputFile);
+}
+
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::SquareMatrix(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE> & matr)
+{
+	SetFromMatr(matr);
+}
+
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::SetFromFile(const std::string & inputFileName)
+{
+	std::ifstream input(inputFileName);
 	if (!input.is_open())
 	{
-		throw std::invalid_argument("Unavailable to open input file");
+		throw std::invalid_argument("Unavailable to open input file: '" + inputFileName + "'");
 	}
 	std::string line;
 	size_t i = 0;
@@ -28,51 +42,55 @@ void SquareMatrix3::InitFromFile(const std::string & inputFile)
 		while (sstream >> value)
 		{
 			m_matr[i][j] = value;
-			if (++j > MATR_SIZE)
+			++j;
+			if (j > MATR_SIZE)
 			{
 				throw std::invalid_argument("So many arguments on " + std::to_string(i) + " line. Matrix must be square with size = " + std::to_string(MATR_SIZE));
 			}
 		}
+		++i;
 		if (j < MATR_SIZE)
 		{
 			throw std::invalid_argument("Not enough arguments on " + std::to_string(i) + " line. Matrix must be square with size = " + std::to_string(MATR_SIZE));
 		}
-		if (++i > MATR_SIZE)
+		if (i > MATR_SIZE)
 		{
 			throw std::invalid_argument("So many line in input file. Matrix must be square with size = " + std::to_string(MATR_SIZE));
 		}
 	}
-	if (++i < MATR_SIZE)
+	if (i < MATR_SIZE)
 	{
 		throw std::invalid_argument("Not enough line in input file. Matrix must be square with size = " + std::to_string(MATR_SIZE));
 	}
 }
 
-void SquareMatrix3::InitFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE>& matr)
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::SetFromMatr(const std::array<std::array<double, MATR_SIZE>, MATR_SIZE>& matr)
 {
 	m_matr = matr;
 }
 
-SquareMatrix3 * SquareMatrix3::Invert()
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::Invert()
 {
 	m_matr = GetInvert(m_matr);
-	return this;
 }
 
-SquareMatrix3 * SquareMatrix3::FindAdjugate()
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::Adjugate()
 {
 	m_matr = GetAdjugate(m_matr);
-	return this;
 }
 
-SquareMatrix3 * SquareMatrix3::Transpose()
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::Transpose()
 {
 	m_matr = GetTranspose(m_matr);
-	return this;
 }
 
+template<std::size_t MATR_SIZE>
 template <std::size_t SIZE>
-double SquareMatrix3::CalcDet(const MatrType<double, SIZE> & matr) const
+double SquareMatrix<MATR_SIZE>::CalcDet(const MatrType<double, SIZE> & matr) const
 {
 	double det = 0;
 	for (size_t j = 0; j < SIZE; ++j)
@@ -82,44 +100,47 @@ double SquareMatrix3::CalcDet(const MatrType<double, SIZE> & matr) const
 	return det;
 }
 
-template <>
-double SquareMatrix3::CalcDet(const MatrType<double, 1> & matr) const
+template<std::size_t MATR_SIZE>
+template<>
+double SquareMatrix<MATR_SIZE>::CalcDet(const MatrType<double, 1> & matr) const
 {
 	return matr[0][0];
 }
 
+template<std::size_t MATR_SIZE>
 template <std::size_t SIZE>
-SquareMatrix3::MatrType<double, SIZE - 1> SquareMatrix3::GetMinor(const MatrType<double, SIZE> & matr, size_t i, size_t j) const
+SquareMatrix<MATR_SIZE>::MatrType<double, SIZE - 1> SquareMatrix<MATR_SIZE>::GetMinor(const MatrType<double, SIZE> & matr, size_t line, size_t collumn) const
 {
-	if (!(i < SIZE && j < SIZE))
+	if (!(line < SIZE && collumn < SIZE))
 	{
 		throw std::logic_error("Not correct line index in GetMinor!");
 	}
 	MatrType<double, SIZE - 1> minor = { {0} };
-	for (size_t ti = 0, mi = 0; ti < SIZE; ++ti, ++mi)
+	for (size_t matrLine = 0, minorLine = 0; matrLine < SIZE; ++matrLine, ++minorLine)
 	{
-		if (ti == i)
+		if (matrLine == line)
 		{
-			++ti;
+			++matrLine;
 		}
-		for (size_t tj = 0, mj = 0; tj < SIZE; ++tj, ++mj)
+		for (size_t matrCollumn = 0, minorCollumn = 0; matrCollumn < SIZE; ++matrCollumn, ++minorCollumn)
 		{
-			if (tj == j)
+			if (matrCollumn == collumn)
 			{
-				++tj;
+				++matrCollumn;
 			}
-			if (ti < SIZE && tj < SIZE)
+			if (matrLine < SIZE && matrCollumn < SIZE)
 			{
-				minor[mi][mj] = matr[ti][tj];
+				minor[minorLine][minorCollumn] = matr[matrLine][matrCollumn];
 			}
 		}
 	}
 	return minor;
 }
 
-SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetAdjugate(const MatrType<double, MATR_SIZE> & matr) const
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::MatrType<double, MATR_SIZE> SquareMatrix<MATR_SIZE>::GetAdjugate(const MatrType<double, MATR_SIZE> & matr) const
 {
-	MatrType<double, MATR_SIZE> adjugate = { {0} };
+	MatrType<double, MATR_SIZE> adjugate = NULL_MATR;
 	for (size_t i = 0; i < MATR_SIZE; ++i)
 	{
 		for (size_t j = 0; j < MATR_SIZE; ++j)
@@ -130,9 +151,10 @@ SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetAdju
 	return GetTranspose(adjugate);
 }
 
-SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetTranspose(const MatrType<double, MATR_SIZE>& matr) const
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::MatrType<double, MATR_SIZE> SquareMatrix<MATR_SIZE>::GetTranspose(const MatrType<double, MATR_SIZE>& matr) const
 {
-	MatrType<double, MATR_SIZE> transpose = { {0} };
+	MatrType<double, MATR_SIZE> transpose = NULL_MATR;
 	for (size_t i = 0; i < MATR_SIZE; ++i)
 	{
 		for (size_t j = 0; j < MATR_SIZE; ++j)
@@ -143,9 +165,10 @@ SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetTran
 	return transpose;
 }
 
-SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetInvert(const MatrType<double, MATR_SIZE>& matr) const
+template<std::size_t MATR_SIZE>
+SquareMatrix<MATR_SIZE>::MatrType<double, MATR_SIZE> SquareMatrix<MATR_SIZE>::GetInvert(const MatrType<double, MATR_SIZE>& matr) const
 {
-	double det = CalcDet(matr);
+	const double det = CalcDet(matr);
 	if (det == 0)
 	{
 		throw std::logic_error("Unable to calculate inverse matrix, determinant is 0");
@@ -161,7 +184,8 @@ SquareMatrix3::MatrType<double, SquareMatrix3::MATR_SIZE> SquareMatrix3::GetInve
 	return invert;
 }
 
-void SquareMatrix3::WriteMatr(std::ostream & stream)
+template<std::size_t MATR_SIZE>
+void SquareMatrix<MATR_SIZE>::WriteMatr(std::ostream & stream) const
 {
 	stream << std::setprecision(PRECISION) << std::fixed;
 	for (const auto & line : m_matr)
@@ -174,7 +198,8 @@ void SquareMatrix3::WriteMatr(std::ostream & stream)
 	}
 }
 
-double SquareMatrix3::GetDeterminant()
+template<std::size_t MATR_SIZE>
+double SquareMatrix<MATR_SIZE>::GetDeterminant() const
 {
 	return CalcDet(m_matr);
 }
