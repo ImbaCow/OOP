@@ -9,7 +9,7 @@ struct ShapeMathResult
 
 	std::string ToString() const
 	{
-		return info 
+		return info
 			+ "; area: " + std::to_string(area)
 			+ "; perimeter: " + std::to_string(perimeter);
 	}

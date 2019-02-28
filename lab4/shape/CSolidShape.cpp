@@ -17,5 +17,5 @@ std::string CSolidShape::ToString() const
 {
 	return GetShapeInfo() + ' '
 		+ std::to_string(GetFillColor()) + ' '
-		+ std::to_string(CShape::GetOutlineColor());
+		+ std::to_string(GetOutlineColor());
 }

@@ -151,9 +151,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\shape\CCircle.h" />
+    <ClInclude Include="..\shape\CLineSegment.h" />
+    <ClInclude Include="..\shape\CPoint.h" />
+    <ClInclude Include="..\shape\CRectangle.h" />
+    <ClInclude Include="..\shape\CShape.h" />
+    <ClInclude Include="..\shape\CSolidShape.h" />
+    <ClInclude Include="..\shape\CTriangle.h" />
+    <ClInclude Include="..\shape\IShape.h" />
+    <ClInclude Include="..\shape\ISolidShape.h" />
+    <ClInclude Include="..\shape\ShapeArray.h" />
+    <ClInclude Include="..\shape\ShapeFactory.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\shape\CCircle.cpp" />
+    <ClCompile Include="..\shape\CLineSegment.cpp" />
+    <ClCompile Include="..\shape\CPoint.cpp" />
+    <ClCompile Include="..\shape\CRectangle.cpp" />
+    <ClCompile Include="..\shape\CShape.cpp" />
+    <ClCompile Include="..\shape\CSolidShape.cpp" />
+    <ClCompile Include="..\shape\CTriangle.cpp" />
+    <ClCompile Include="..\shape\ShapeArray.cpp" />
+    <ClCompile Include="..\shape\ShapeFactory.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

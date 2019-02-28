@@ -11,7 +11,7 @@ std::vector<std::unique_ptr<IShape>> GetShapeArrayFromStream(std::istream& input
 	{
 		try
 		{
-			shapeArr.push_back(ShapeFactory::CreateShape(shapeInfo));
+			shapeArr.push_back(CreateShape(shapeInfo));
 		}
 		catch (const std::exception& e)
 		{

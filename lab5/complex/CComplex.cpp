@@ -1,4 +1,4 @@
-#include "pch.h" 
+#include "pch.h"
 #include "CComplex.h"
 
 CComplex::CComplex(double real, double imag)
@@ -106,7 +106,7 @@ std::string CComplex::doubleToString(double num)
 
 CComplex operator+(const CComplex& a, const CComplex& b)
 {
-	return { a.m_real + b.m_real, a.m_imag + b.m_imag };
+	return { a.Re() + b.Re(), a.Im() + b.Im() };
 }
 
 CComplex operator-(const CComplex& a, const CComplex& b)
@@ -116,26 +116,26 @@ CComplex operator-(const CComplex& a, const CComplex& b)
 
 CComplex operator*(const CComplex& a, const CComplex& b)
 {
-	double newReal = a.m_real * b.m_real - a.m_imag * b.m_imag;
-	double newImag = a.m_imag * b.m_real + a.m_real * b.m_imag;
+	double newReal = a.Re() * b.Re() - a.Im() * b.Im();
+	double newImag = a.Im() * b.Re() + a.Re() * b.Im();
 	return { newReal, newImag };
 }
 
 CComplex operator/(const CComplex& a, const CComplex& b)
 {
-	if (b.m_real == 0 && b.m_imag == 0)
+	if (b.Re() == 0 && b.Im() == 0)
 	{
 		throw std::logic_error("Second number must not be zero");
 	}
-	double newReal = (a.m_real * b.m_real + a.m_imag * b.m_imag) / (std::pow(b.m_real, 2) + std::pow(b.m_imag, 2));
-	double newImag = (a.m_imag * b.m_real - a.m_real * b.m_imag) / (std::pow(b.m_real, 2) + std::pow(b.m_imag, 2));
+	double newReal = (a.Re() * b.Re() + a.Im() * b.Im()) / (std::pow(b.Re(), 2) + std::pow(b.Im(), 2));
+	double newImag = (a.Im() * b.Re() - a.Re() * b.Im()) / (std::pow(b.Re(), 2) + std::pow(b.Im(), 2));
 	return { newReal, newImag };
 }
 
 bool operator==(const CComplex& a, const CComplex& b)
 {
-	bool realEqual = std::abs(a.m_real - b.m_real) < DBL_EPSILON;
-	bool imagEqual = std::abs(a.m_imag - b.m_imag) < DBL_EPSILON;
+	bool realEqual = std::abs(a.Re() - b.Re()) < DBL_EPSILON;
+	bool imagEqual = std::abs(a.Im() - b.Im()) < DBL_EPSILON;
 	return realEqual && imagEqual;
 }
 

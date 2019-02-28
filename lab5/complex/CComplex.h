@@ -14,25 +14,14 @@ public:
 	CComplex operator=(const CComplex& b);
 	std::string ToString() const;
 
-	friend CComplex operator+(const CComplex& a, const CComplex& b);
 	CComplex operator+() const;
 	CComplex operator+=(const CComplex& b);
 
-	friend CComplex operator-(const CComplex& a, const CComplex& b);
 	CComplex operator-() const;
 	CComplex operator-=(const CComplex& b);
 
-	friend CComplex operator*(const CComplex& a, const CComplex& b);
 	CComplex operator*=(const CComplex& b);
-
-	friend CComplex operator/(const CComplex& a, const CComplex& b);
 	CComplex operator/=(const CComplex& b);
-
-	friend bool operator==(const CComplex& a, const CComplex& b);
-	friend bool operator!=(const CComplex& a, const CComplex& b);
-
-	friend std::ostream& operator<<(std::ostream& out, const CComplex& b);
-	friend std::istream& operator>>(std::istream& in, CComplex& b);
 
 private:
 	double m_real;
@@ -40,3 +29,15 @@ private:
 
 	static std::string doubleToString(double num);
 };
+
+CComplex operator-(const CComplex& a, const CComplex& b);
+CComplex operator+(const CComplex& a, const CComplex& b);
+
+CComplex operator*(const CComplex& a, const CComplex& b);
+CComplex operator/(const CComplex& a, const CComplex& b);
+
+bool operator==(const CComplex& a, const CComplex& b);
+bool operator!=(const CComplex& a, const CComplex& b);
+
+std::ostream& operator<<(std::ostream& out, const CComplex& b);
+std::istream& operator>>(std::istream& in, CComplex& b);
