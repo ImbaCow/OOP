@@ -15,3 +15,5 @@ public:
 protected:
 	uint32_t m_fillColor;
 };
+
+
