@@ -23,12 +23,13 @@ public:
 	std::string ToString() const;
 
 private:
-	std::vector<std::vector<char>> m_fields;
+	std::vector<std::vector<char>> m_rows;
 	std::vector<Coords> m_marksCoords;
 
 	void IteratFill(const Coords& coords);
 	void PaintField(const Coords& paintCoords, char paintChar);
 	void ProcessStack(std::stack<Coords>& coordsStack);
+	void TryPushCoords(const Coords& coords, std::stack<Coords>& coordsStack);
 
 	bool IsCoordsValid(const Coords& coords) const;
 	bool CanFill(const Coords& coords) const;

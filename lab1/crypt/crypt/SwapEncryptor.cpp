@@ -31,33 +31,28 @@ uint8_t decodeByte(uint8_t byte, uint8_t key)
 	return byte ^ key;
 }
 
-SwapEncryptor::SwapEncryptor(uint8_t key)
-	: m_key(key)
-{
-}
-
-void SwapEncryptor::encryptStream(const std::string& mode, std::istream& input, std::ostream& output)
-{
-	if (mode == "crypt")
-	{
-		encode(input, output, encodeByte);
-	}
-	else if (mode == "decrypt")
-	{
-		encode(input, output, decodeByte);
-	}
-	else
-	{
-		throw std::invalid_argument("Crypt mode must be \"crypt\" or \"decrypt\"");
-	}
-}
-
-void SwapEncryptor::encode(std::istream& input, std::ostream& output, const std::function<uint8_t(uint8_t, uint8_t)>& modeFunc)
+void encode(const std::function<uint8_t(uint8_t, uint8_t)>& modeFunc, std::istream& input, std::ostream& output, uint8_t key)
 {
 	uint8_t byte;
 	while (input.read(reinterpret_cast<char*>(&byte), sizeof(byte)))
 	{
-		uint8_t encodedByte = modeFunc(byte, m_key);
+		uint8_t encodedByte = modeFunc(byte, key);
 		output.write(reinterpret_cast<char*>(&encodedByte), sizeof(encodedByte));
+	}
+}
+
+void encryptStream(const std::string& mode, std::istream& input, std::ostream& output, uint8_t key)
+{
+	if (mode == "crypt")
+	{
+		encode(encodeByte, input, output, key);
+	}
+	else if (mode == "decrypt")
+	{
+		encode(decodeByte, input, output, key);
+	}
+	else
+	{
+		throw std::invalid_argument("Crypt mode must be \"crypt\" or \"decrypt\"");
 	}
 }
