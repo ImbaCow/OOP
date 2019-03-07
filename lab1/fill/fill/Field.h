@@ -6,8 +6,7 @@ const size_t MAX_Y_SIZE = 100;
 const char FILL_MARK_CHAR = 'O';
 const char BORDER_CHAR = '#';
 const char FILLED_CHAR = '-';
-const char SPACE_CHAR = ' ';
-const char EMPTY_CHAR = '\0';
+const char EMPTY_CHAR = ' ';
 
 struct Coords
 {

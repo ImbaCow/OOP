@@ -14,14 +14,11 @@ Field::Field(std::istream& input)
 			{
 				m_marksCoords.push_back({ column, line });
 			}
-			else if (currChar != BORDER_CHAR && currChar != '\n')
+			else if (currChar != BORDER_CHAR)
 			{
 				currChar = EMPTY_CHAR;
 			}
-			if (currChar != '\n')
-			{
-				m_fields[line].push_back(currChar);
-			}
+			m_fields[line].push_back(currChar);
 		}
 	}
 }
