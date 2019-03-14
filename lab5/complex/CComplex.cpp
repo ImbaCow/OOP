@@ -31,28 +31,25 @@ double CComplex::GetArgument() const
 	return std::atan2(m_imag, m_real);
 }
 
-CComplex CComplex::operator=(const CComplex& b)
-{
-	m_real = b.m_real;
-	m_imag = b.m_imag;
-	return *this;
-}
-
 std::string CComplex::ToString() const
 {
 	std::string result;
 
 	if (m_imag == 0)
 	{
-		result += doubleToString(m_real);
+		result += DoubleToString(m_real);
 	}
 	else
 	{
 		if (m_real != 0)
 		{
-			result += doubleToString(m_real) + " + ";
+			result += DoubleToString(m_real);
+			if (m_imag > 0)
+			{
+				result += '+';
+			}
 		}
-		result += doubleToString(m_imag) + 'i';
+		result += DoubleToString(m_imag) + 'i';
 	}
 
 	return result;
@@ -63,7 +60,7 @@ CComplex CComplex::operator+() const
 	return *this;
 }
 
-CComplex CComplex::operator+=(const CComplex& b)
+CComplex& CComplex::operator+=(const CComplex& b)
 {
 	*this = *this + b;
 	return *this;
@@ -74,25 +71,25 @@ CComplex CComplex::operator-() const
 	return { -m_real, -m_imag };
 }
 
-CComplex CComplex::operator-=(const CComplex& b)
+CComplex& CComplex::operator-=(const CComplex& b)
 {
 	*this = *this - b;
 	return *this;
 }
 
-CComplex CComplex::operator*=(const CComplex& b)
+CComplex& CComplex::operator*=(const CComplex& b)
 {
 	*this = *this * b;
 	return *this;
 }
 
-CComplex CComplex::operator/=(const CComplex& b)
+CComplex& CComplex::operator/=(const CComplex& b)
 {
 	*this = *this / b;
 	return *this;
 }
 
-std::string CComplex::doubleToString(double num)
+std::string CComplex::DoubleToString(double num)
 {
 	std::string numStr = std::to_string(num);
 	numStr.resize(numStr.find_last_not_of('0') + 1);
@@ -127,8 +124,9 @@ CComplex operator/(const CComplex& a, const CComplex& b)
 	{
 		throw std::logic_error("Second number must not be zero");
 	}
-	double newReal = (a.Re() * b.Re() + a.Im() * b.Im()) / (std::pow(b.Re(), 2) + std::pow(b.Im(), 2));
-	double newImag = (a.Im() * b.Re() - a.Re() * b.Im()) / (std::pow(b.Re(), 2) + std::pow(b.Im(), 2));
+	double divisor = std::pow(b.Re(), 2) + std::pow(b.Im(), 2);
+	double newReal = (a.Re() * b.Re() + a.Im() * b.Im()) / divisor;
+	double newImag = (a.Im() * b.Re() - a.Re() * b.Im()) / divisor;
 	return { newReal, newImag };
 }
 
@@ -153,14 +151,18 @@ std::ostream& operator<<(std::ostream& out, const CComplex& b)
 std::istream& operator>>(std::istream& in, CComplex& b)
 {
 	double real, imag;
-	char plus, i;
+	char op, i;
 
 	if (!(in >> real
-			&& in >> plus && plus == '+'
+			&& in >> op && (op == '+' || op == '-')
 			&& in >> imag
 			&& in >> i && i == 'i'))
 	{
 		throw std::invalid_argument("Invalid complex number");
+	}
+	if (op == '-')
+	{
+		imag = -imag;
 	}
 
 	b = { real, imag };
