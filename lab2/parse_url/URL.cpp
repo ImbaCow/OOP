@@ -3,8 +3,8 @@
 
 const std::string PROTOCOL_REGEX = R"((?:(https?|ftp):\/\/)?)";
 const std::string HOST_REGEX = R"(([^:\s\/\\?#]+))";
-const std::string PORT_REGEX = R"((?::(?:0*([1-5][0-9]{4}|6(?:[0-4][0-9]{3}|5(?:[0-4][0-9]{2}|5(?:[0-2][0-9]|3[0-5])))|[1-9][0-9]{0,3})))?)";
-const std::string PATH_REGEX = R"((?:\/((?:[^:\/\\?#]+\/?)*))?)";
+const std::string PORT_REGEX = R"((?::(\d+))?)";
+const std::string DOC_REGEX = R"((?:\/((?:[^:\/\\]+\/?)*))?)";
 
 const std::string URL_REGEX_PATTERN = "^%s%s%s%s$";
 
@@ -74,16 +74,25 @@ int PortFromString(const std::string& str, const Protocol& protocol)
 
 bool ParseURL(const std::string& url, Protocol& protocol, int& port, std::string& host, std::string& document)
 {
-	std::string regexStr = (boost::format(URL_REGEX_PATTERN) % PROTOCOL_REGEX % HOST_REGEX % PORT_REGEX % PATH_REGEX).str();
+	std::string regexStr = (boost::format(URL_REGEX_PATTERN) % PROTOCOL_REGEX % HOST_REGEX % PORT_REGEX % DOC_REGEX).str();
 	std::regex reg(regexStr, std::regex_constants::icase);
-	std::cmatch match;
-	if (std::regex_match(url.c_str(), match, reg))
+	std::smatch match;
+
+	if (!std::regex_match(url, match, reg))
+	{
+		return false;
+	}
+
+	try
 	{
 		protocol = ProtocolFromString(std::string(match[1].first, match[1].second));
 		host = std::string(match[2].first, match[2].second);
 		port = PortFromString(std::string(match[3].first, match[3].second), protocol);
 		document = std::string(match[4].first, match[4].second);
-		return true;
 	}
-	return false;
+	catch (const std::exception&)
+	{
+		return false;
+	}
+	return true;
 }

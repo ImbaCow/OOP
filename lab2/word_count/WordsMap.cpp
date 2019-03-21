@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "WordsMap.h"
 
-void ToUpper(std::string& str)
+void ToLower(std::string& str)
 {
 	std::transform(str.begin(), str.end(), str.begin(), tolower);
 }
@@ -12,7 +12,7 @@ std::map<std::string, size_t> CreateWordsMap(std::istream& input)
 	std::string word;
 	while (input >> word)
 	{
-		ToUpper(word);
+		ToLower(word);
 		if (wordsMap.count(word))
 		{
 			++wordsMap[word];
