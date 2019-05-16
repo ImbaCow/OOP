@@ -6,14 +6,16 @@ int CompareStrings(const CMyString& a, const CMyString& b)
 	size_t aLen = a.GetLength();
 	size_t bLen = b.GetLength();
 
-	return memcmp(a.GetStringData(), b.GetStringData(), std::min(aLen, bLen));
+	int result = memcmp(a.GetStringData(), b.GetStringData(), std::min(aLen, bLen));
+	return (result == 0) ? (aLen - bLen) : result;
 }
 
 CMyString::CMyString(const char* pString, size_t size)
 {
 	m_string = new char[size + 1];
-	memcpy(m_string, pString, size + 1);
-	m_size = std::move(size);
+	memcpy(m_string, pString, size);
+	m_string[size] = '\0';
+	m_size = size;
 }
 
 CMyString::CMyString(const char* pString)
@@ -28,8 +30,8 @@ CMyString::CMyString(const CMyString& other)
 
 CMyString::CMyString(CMyString&& other)
 {
-	m_string = other.m_string;
-	m_size = other.m_size;
+	m_string = std::move(other.m_string);
+	m_size = std::move(other.m_size);
 	other.m_string = nullptr;
 }
 
@@ -65,6 +67,7 @@ CMyString CMyString::SubString(size_t start, size_t length) const
 void CMyString::Clear()
 {
 	delete[] m_string;
+	m_string = new char[1]{ "" };
 	m_size = 0;
 }
 
@@ -87,27 +90,77 @@ CMyString& CMyString::operator=(const CMyString& b)
 	return *this;
 }
 
-char& CMyString::operator[](size_t index)
+char& CMyString::operator[](size_t index) const
 {
 	return m_string[index];
 }
 
 CMyString operator+(const CMyString& a, const CMyString& b)
 {
-	size_t aLen = a.GetLength();
-	size_t bLen = b.GetLength();
+	CMyString result(a);
+	result.Append(b);
 
-	char* resultStr = new char[aLen + bLen + 1];
+	return result;
+}
 
-	memcpy(resultStr, a.GetStringData(), aLen);
-	memcpy(resultStr + aLen, b.GetStringData(), bLen + 1);
+void CMyString::Append(const CMyString& str)
+{
+	size_t strLen = str.GetLength();
 
-	return CMyString(resultStr, aLen + bLen);
+	size_t newStrSize = m_size + strLen;
+	char* newStr = new char[newStrSize + 1];
+
+	memcpy(newStr, m_string, m_size);
+	memcpy(newStr + m_size, str.GetStringData(), strLen + 1);
+	delete[] m_string;
+
+	m_string = newStr;
+	m_size = newStrSize;
+}
+
+CMyString::iterator CMyString::begin()
+{
+	return iterator(m_string);
+}
+
+CMyString::iterator CMyString::end()
+{
+	return iterator(m_string + m_size);
+}
+
+CMyString::reverse_iterator CMyString::rbegin()
+{
+	return reverse_iterator(end());
+}
+
+CMyString::reverse_iterator CMyString::rend()
+{
+	return reverse_iterator(begin());
+}
+
+CMyString::const_iterator CMyString::begin() const
+{
+	return const_iterator(m_string);
+}
+
+CMyString::const_iterator CMyString::end() const
+{
+	return const_iterator(m_string + m_size);
+}
+
+CMyString::const_reverse_iterator CMyString::rbegin() const
+{
+	return const_reverse_iterator(end());
+}
+
+CMyString::const_reverse_iterator CMyString::rend() const
+{
+	return const_reverse_iterator(begin());
 }
 
 bool operator==(const CMyString& a, const CMyString& b)
 {
-	return (CompareStrings(a, b) == 0);
+	return CompareStrings(a, b) == 0;
 }
 
 bool operator!=(const CMyString& a, const CMyString& b)
@@ -127,16 +180,19 @@ bool operator>(const CMyString& a, const CMyString& b)
 
 bool operator<=(const CMyString& a, const CMyString& b)
 {
-	return (a < b) || (a == b);
+	return !(CompareStrings(a, b) > 0);
 }
 
 bool operator>=(const CMyString& a, const CMyString& b)
 {
-	return (a > b) || (a == b);
+	return !(CompareStrings(a, b) < 0);
 }
 
 std::ostream& operator<<(std::ostream& out, const CMyString& b)
 {
-	out << b.GetStringData();
+	for (size_t i = 0; i < b.GetLength(); i++)
+	{
+		out << b[i];
+	}
 	return out;
 }

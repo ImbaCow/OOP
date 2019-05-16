@@ -1,7 +1,15 @@
 #pragma once
+#include "CMyStringIterator.h"
+
 class CMyString
 {
 public:
+	using iterator = CMyStringIterator<char>;
+	using const_iterator = CMyStringIterator<const char>;
+		
+	using reverse_iterator = std::reverse_iterator<iterator>;
+	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
 	CMyString(const char* pString = "");
 	CMyString(const char* pString, size_t length);
 	CMyString(const CMyString& other);
@@ -13,10 +21,21 @@ public:
 	const char* GetStringData() const;
 	CMyString SubString(size_t start, size_t length = SIZE_MAX) const;
 	void Clear();
+	void Append(const CMyString& str);
 
 	CMyString& operator+=(const CMyString& b);
 	CMyString& operator=(const CMyString& b);
-	char& operator[](size_t index);
+	char& operator[](size_t index) const;
+
+	iterator begin();
+	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
+
+	reverse_iterator rbegin();
+	reverse_iterator rend();
+	const_reverse_iterator rbegin() const;
+	const_reverse_iterator rend() const;
 
 private:
 	char* m_string;
@@ -36,5 +55,3 @@ bool operator>=(const CMyString& a, const CMyString& b);
 
 std::ostream& operator<<(std::ostream& out, const CMyString& b);
 //std::istream& operator>>(std::istream& in, CMyString& b);
-
-int CompareStrings(const CMyString& a, const CMyString& b);

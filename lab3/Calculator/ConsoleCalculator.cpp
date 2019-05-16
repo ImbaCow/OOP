@@ -100,7 +100,7 @@ CalcCommand ConsoleCalculator::StringToCommand(const std::string& commandString)
 	}
 	else
 	{
-		throw new std::invalid_argument("Unhandled command: '" + commandString + "' given.");
+		throw std::invalid_argument("Unhandled command: '" + commandString + "' given.");
 	}
 
 	return result;
