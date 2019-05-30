@@ -1,13 +1,26 @@
 #include "pch.h"
 #include "CMyString.h"
 
+int CompareSizeT(size_t a, size_t b)
+{
+	if (a == b)
+	{
+		return 0;
+	}
+	else if (a > b)
+	{
+		return 1;
+	}
+	return -1;
+}
+
 int CompareStrings(const CMyString& a, const CMyString& b)
 {
 	size_t aLen = a.GetLength();
 	size_t bLen = b.GetLength();
 
 	int result = memcmp(a.GetStringData(), b.GetStringData(), std::min(aLen, bLen));
-	return (result == 0) ? (aLen - bLen) : result;
+	return (result == 0) ? CompareSizeT(aLen, bLen) : result;
 }
 
 CMyString::CMyString(const char* pString, size_t size)
@@ -33,11 +46,18 @@ CMyString::CMyString(CMyString&& other)
 	m_string = std::move(other.m_string);
 	m_size = std::move(other.m_size);
 	other.m_string = nullptr;
+	other.m_size = 0;
 }
 
 CMyString::CMyString(const std::string& stlString)
 	: CMyString(stlString.c_str(), stlString.size())
 {
+}
+
+CMyString::CMyString(size_t size)
+{
+	m_string = new char[size + 1];
+	m_size = size;
 }
 
 CMyString::~CMyString()
@@ -66,9 +86,10 @@ CMyString CMyString::SubString(size_t start, size_t length) const
 
 void CMyString::Clear()
 {
-	delete[] m_string;
-	m_string = new char[1]{ "" };
-	m_size = 0;
+	CMyString temp;
+
+	std::swap(m_string, temp.m_string);
+	std::swap(m_size, temp.m_size);
 }
 
 CMyString& CMyString::operator+=(const CMyString& b)
@@ -90,32 +111,23 @@ CMyString& CMyString::operator=(const CMyString& b)
 	return *this;
 }
 
-char& CMyString::operator[](size_t index) const
+char& CMyString::operator[](size_t index)
+{
+	return m_string[index];
+}
+
+const char& CMyString::operator[](size_t index) const
 {
 	return m_string[index];
 }
 
 CMyString operator+(const CMyString& a, const CMyString& b)
 {
-	CMyString result(a);
-	result.Append(b);
+	CMyString result(a.m_size + b.m_size);
+	memcpy(result.m_string, a.m_string, a.m_size);
+	memcpy(result.m_string + a.m_size, b.m_string, b.m_size + 1);
 
 	return result;
-}
-
-void CMyString::Append(const CMyString& str)
-{
-	size_t strLen = str.GetLength();
-
-	size_t newStrSize = m_size + strLen;
-	char* newStr = new char[newStrSize + 1];
-
-	memcpy(newStr, m_string, m_size);
-	memcpy(newStr + m_size, str.GetStringData(), strLen + 1);
-	delete[] m_string;
-
-	m_string = newStr;
-	m_size = newStrSize;
 }
 
 CMyString::iterator CMyString::begin()

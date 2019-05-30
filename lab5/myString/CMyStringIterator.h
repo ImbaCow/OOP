@@ -29,7 +29,6 @@ public:
 	inline CMyStringIterator operator+(difference_type offset) const;
 	inline CMyStringIterator operator-(difference_type offset) const;
 	friend inline CMyStringIterator<Type> operator+(difference_type offset, const CMyStringIterator<Type>& it);
-	friend inline CMyStringIterator<Type> operator-(difference_type offset, const CMyStringIterator<Type>& it);
 
 	inline bool operator==(const CMyStringIterator& it) const;
 	inline bool operator!=(const CMyStringIterator& it) const;
@@ -148,12 +147,6 @@ template <typename Type>
 inline CMyStringIterator<Type> operator+(typename CMyStringIterator<Type>::difference_type offset, const CMyStringIterator<Type>& it)
 {
 	return it + offset;
-}
-
-template <typename Type>
-inline CMyStringIterator<Type> operator-(typename CMyStringIterator<Type>::difference_type offset, const CMyStringIterator<Type>& it)
-{
-	return CMyStringIterator<Type>(offset - it.m_ch);
 }
 
 template <typename Type>
