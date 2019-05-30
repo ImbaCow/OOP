@@ -1,5 +1,17 @@
 #include "pch.h"
 #include "CHttpUrl.h"
+#include "CUrlParsingError.h"
+
+
+const std::string PROTOCOL_REGEX = R"((?:([a-z]+):\/\/)?)";
+const std::string DOMAIN_REGEX = R"(([^:\s\/\\?#]+))";
+const std::string PORT_REGEX = R"((?::(\d+))?)";
+const std::string DOC_REGEX = R"((\/(?:[^:\/\\]*\/?)*)?)";
+
+const std::string URL_REGEX_PATTERN = "^%s%s%s%s$";
+
+const unsigned short DEFAULT_HTTP_PORT = 80;
+const unsigned short DEFAULT_HTTPS_PORT = 443;
 
 CHttpUrl::CHttpUrl(const std::string& url)
 {
@@ -42,7 +54,7 @@ std::string CHttpUrl::GetDocument() const
 	return m_document;
 }
 
-Protocol CHttpUrl::GetProtocol() const
+CHttpUrl::Protocol CHttpUrl::GetProtocol() const
 {
 	return m_protocol;
 }
@@ -70,7 +82,7 @@ void CHttpUrl::ParseURL(const std::string& urlString)
 	m_document = DocumentFromString(std::string(match[4].first, match[4].second));
 }
 
-unsigned short CHttpUrl::GetDefaultPort(Protocol protocol) const
+unsigned short CHttpUrl::GetDefaultPort(Protocol protocol)
 {
 	unsigned short resultPort;
 	switch (protocol)
@@ -88,7 +100,7 @@ unsigned short CHttpUrl::GetDefaultPort(Protocol protocol) const
 	return resultPort;
 }
 
-std::string CHttpUrl::ProtocolToString(Protocol protocol) const
+std::string CHttpUrl::ProtocolToString(Protocol protocol)
 {
 	std::string resultString;
 	switch (protocol)
@@ -106,7 +118,7 @@ std::string CHttpUrl::ProtocolToString(Protocol protocol) const
 	return resultString;
 }
 
-Protocol CHttpUrl::ProtocolFromString(const std::string& protocolString) const
+CHttpUrl::Protocol CHttpUrl::ProtocolFromString(const std::string& protocolString)
 {
 	std::string lowerStr(boost::to_lower_copy<std::string>(protocolString));
 	Protocol resultProtocol;
@@ -127,7 +139,7 @@ Protocol CHttpUrl::ProtocolFromString(const std::string& protocolString) const
 	return resultProtocol;
 }
 
-std::string CHttpUrl::DocumentFromString(std::string documentString) const
+std::string CHttpUrl::DocumentFromString(std::string documentString)
 {
 	if (documentString.empty() || documentString[0] != '/')
 	{
@@ -136,7 +148,7 @@ std::string CHttpUrl::DocumentFromString(std::string documentString) const
 	return documentString;
 }
 
-unsigned short CHttpUrl::PortFromString(const std::string& portString, Protocol protocol) const
+unsigned short CHttpUrl::PortFromString(const std::string& portString, Protocol protocol)
 {
 	if (portString.empty())
 	{
@@ -148,6 +160,9 @@ unsigned short CHttpUrl::PortFromString(const std::string& portString, Protocol 
 		port = boost::lexical_cast<unsigned short>(portString);
 	}
 	catch (const boost::bad_lexical_cast&)
+	{
+	}
+	if (port == 0)
 	{
 		throw std::invalid_argument("Wrong port given: " + portString);
 	}
