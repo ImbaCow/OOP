@@ -12,7 +12,7 @@ public:
 	using reverse_iterator = std::reverse_iterator<iterator>;
 	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-	CMyArray(const T* pString, size_t size);
+	CMyArray(T* arr, size_t size);
 	CMyArray(const CMyArray& other);
 	CMyArray(CMyArray&& other);
 	CMyArray();
@@ -47,4 +47,6 @@ private:
 
 	CMyArray(size_t size);
 	CMyArray(T* arr, size_t size, size_t capacity);
+
+	static void DestroyArr(T* begin, T* end);
 };

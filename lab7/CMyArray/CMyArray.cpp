@@ -5,12 +5,51 @@ const int CAPACITY_PUSH_STEP = 5;
 const int EMPTY_CAPACITY_SIZE = 1;
 
 template <typename T>
-CMyArray<T>::CMyArray(const T* arr, size_t size)
-	: m_arr(new T[size])
-	, m_size(size)
-	, m_capacity(size)
+CMyArray<T>::CMyArray(size_t size)
+	: m_size(size)
 {
-	memcpy(m_arr, arr, sizeof(T) * size);
+	m_arr = static_cast<T*>(malloc(size * sizeof(T)));
+	if (m_arr == nullptr)
+	{
+		throw std::bad_alloc();
+	}
+}
+
+template <typename T>
+CMyArray<T>::CMyArray(T* arr, size_t size, size_t capacity)
+	: CMyArray(capacity)
+{
+	m_size = size;
+	CMyArrayIterator<T> currPtr(m_arr);
+	CMyArrayIterator<T> endPtr(arr + size);
+	try
+	{
+		for (CMyArrayIterator<T> otherPtr(arr); otherPtr != endPtr; ++currPtr, ++otherPtr)
+		{
+			new (currPtr.m_item) T(*otherPtr);
+		}
+	}
+	catch (...)
+	{
+		DestroyArr(m_arr, currPtr.m_item);
+	}
+}
+
+template <typename T>
+void CMyArray<T>::DestroyArr(T* begin, T* end)
+{
+	while (begin != end)
+	{
+		--end;
+		end->~T();
+	}
+	free(end);
+}
+
+template <typename T>
+CMyArray<T>::CMyArray(T* arr, size_t size)
+	: CMyArray(arr, size, size)
+{
 }
 
 template <typename T>
@@ -32,16 +71,15 @@ CMyArray<T>::CMyArray(CMyArray&& other)
 
 template <typename T>
 CMyArray<T>::CMyArray()
-	: m_arr(new T[EMPTY_CAPACITY_SIZE])
-	, m_size(0)
-	, m_capacity(EMPTY_CAPACITY_SIZE)
+	: CMyArray(EMPTY_CAPACITY_SIZE)
 {
+	m_size = 0;
 }
 
 template <typename T>
 CMyArray<T>::~CMyArray()
 {
-	delete[] m_arr;
+	DestroyArr(begin().m_item, end().m_item);
 }
 
 template <typename T>
@@ -152,22 +190,6 @@ const T& CMyArray<T>::operator[](size_t index) const
 }
 
 template <typename T>
-CMyArray<T>::CMyArray(size_t size)
-	: m_arr(new T[size])
-	, m_size(size)
-{
-}
-
-template <typename T>
-CMyArray<T>::CMyArray(T* arr, size_t size, size_t capacity)
-	: m_arr(new T[capacity])
-	, m_size(size)
-	, m_capacity(capacity)
-{
-	memcpy(m_arr, arr, sizeof(T) * size);
-}
-
-template <typename T>
 typename CMyArray<T>::iterator CMyArray<T>::begin()
 {
 	return iterator(m_arr);
@@ -214,4 +236,3 @@ typename CMyArray<T>::const_reverse_iterator CMyArray<T>::rend() const
 {
 	return reverse_iterator(begin());
 }
-

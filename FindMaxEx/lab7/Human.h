@@ -7,12 +7,12 @@ struct Human
 	size_t height;
 	size_t weight;
 
-	static bool lessHumanHeight(Human first, Human second)
+	static bool lessHumanHeight(const Human& first, const Human& second)
 	{
 		return first.height < second.height;
 	}
 
-	static bool lessHumanWeight(Human first, Human second)
+	static bool lessHumanWeight(const Human& first, const Human& second)
 	{
 		return first.weight < second.weight;
 	}

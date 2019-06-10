@@ -41,7 +41,7 @@ public:
 	inline bool operator<=(const CMyArrayIterator& it) const;
 
 private:
-	T* m_item;
+	T* m_item = nullptr;
 
 	CMyArrayIterator(T* ch);
 };
